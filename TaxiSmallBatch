@@ -1,0 +1,98 @@
+# Importing libraries
+print 'Importing libraries...'
+import urllib2 # Now I am importing the whole urllib2 library, not just the urlopen function, in order to catch any HTTPErrors
+from json import load
+import csv, time, codecs
+
+key = 'AIzaSyDiyvnT0vQkEoNk7d_wchxWGWMpp9ztacA'
+baseUrl = 'https://maps.googleapis.com/maps/api/directions/json?origin='
+'''
+latOrigin = 40.68813
+lonOrigin = -73.95545
+latDest = 40.80754
+lonDest = -73.96257
+departureTime = 1343641500
+'''
+
+
+# Opening the points file
+pointFileLocation = 'D:\My Documents/advGis_taxiCode_smallTest.csv'
+with open(pointFileLocation, 'rb') as basePoints:
+    reader = csv.reader(basePoints, delimiter = ',')
+    pointsList = list(reader)
+
+
+#output = open.('Users\markmeiklejohn\Documents\GSAPP\FALL_2015\Advanced_GIS/googleAPIroutes.csv','wb')
+#output.write('Name,lat,lon,checkins\n')
+
+# example siteL https://maps.googleapis.com/maps/api/directions/json?origin=Brooklyn&destination=Queens&mode=transit&key=API_KEY
+
+
+# Starting the loop (for every single line in the points file)
+#errors = 0 # I'm setting up this variable to keep track of the number of errors
+for line in pointsList:
+    latOrigin = line[6]
+    lonOrigin = line[5]
+    latDest = line[10]
+    lonDest = line[9]
+    departureTime = line[18]
+
+    # Querying the API
+    print 'Querying the API...'
+    try:
+        request = baseUrl+str(latOrigin)+','+str(lonOrigin)+'&destination='+str(latDest)+','+str(lonDest)+'&mode=transit'+'&departure_time='+ str(departureTime)+'&key='+str(key)
+        print request
+
+        response = urllib2.urlopen(request)
+        baseData = load(response)
+        print baseData
+        duration = baseData['routes'][0]['legs'][0]['duration']['text']
+
+        print ' '
+        print 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+        print ' '
+        print duration
+        
+        '''
+        for x in range(len(duration)):
+            durationLength = duration[x]
+            print ' '
+            print 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+            print ' '
+            '''
+        
+        print ' '
+        print '/////////////////////////////////////////////////////'
+        print ' '
+
+        # Catch any HTTP errors and print them to the output screen
+    except urllib2.HTTPError as e:
+        errors = 1
+        print e
+        # If you start getting 403 errors, it's probably because you've exceeded your quota. So you have to wait for a while before you can query the API again.
+
+    # Wait for one second before starting the next query
+    time.sleep(1)
+print '//////////////////////////////////////////////////'
+'''duration = baseData['routes']['arrival_time']['text']
+print duration'''
+
+
+'''# Looping through the venues and getting some of the data out
+for x in range(len(venues)):
+print venues[x]['name']
+output.write(venues[x]['name']+',')
+location = venues[x]['location']
+print location['lat']
+output.write(str(location['lat'])+',')
+output.write(str(location['lng'])+',')
+print location['lng']
+stats = venues[x]['stats']
+output.write(str(stats['checkinsCount'])+'\n')
+print stats['checkinsCount']
+
+# Closing the output file
+output.close()
+
+print 'Done with everything...'
+'''
